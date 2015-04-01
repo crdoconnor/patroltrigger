@@ -21,7 +21,7 @@ class PatrolModule(object):
     def run_all_methods(self):
         """Cycle through all methods and run."""
         for name, method in self.all_methods:
-            method()
+            method([])
 
     def run_method(self, name, filenames=None):
         """Run a specific, named method."""

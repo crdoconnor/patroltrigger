@@ -10,6 +10,8 @@ import subprocess
 
 def cli(actual_patrol_module):
     """Command line interpreter for a patrol file."""
+    patrolpy_directory = os.path.dirname(os.path.realpath(sys.argv[0]))
+
     parser = optparse.OptionParser()
     parser.add_option("-r", "--run", type="str", dest="run", default=None,
                       help="Specify a method in {} to run directly.".format(actual_patrol_module.__file__))
@@ -18,7 +20,7 @@ def cli(actual_patrol_module):
     parser.add_option("-p", "--post", type="str", dest="post",
                       help="Command to run after a trigger (e.g. guake)")
     parser.add_option("-d", "--directory", type="str", dest="directory",
-                      help="Directory to run {} in (default: {}).".format(actual_patrol_module.__file__, sys.argv[0]))
+                      help="Directory to run {} in (default: {}).".format(actual_patrol_module.__file__, patrolpy_directory))
 
     options, _ = parser.parse_args(sys.argv[1:])
 
@@ -40,7 +42,7 @@ def cli(actual_patrol_module):
     if options.directory:
         cwd = options.directory
     else:
-        cwd = os.path.dirname(os.path.realpath(sys.argv[0]))
+        cwd = patrolpy_directory
 
     os.chdir(cwd)
     subdirectories = [os.path.realpath(x[0]) for x in os.walk(cwd)]
