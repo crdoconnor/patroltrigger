@@ -1,11 +1,8 @@
 import os
 import sys
 import optparse
-import inspect
-import pyuv
-import signal
 import module
-import subprocess
+import watcher
 
 
 def cli(actual_patrol_module):
@@ -24,59 +21,29 @@ def cli(actual_patrol_module):
 
     options, _ = parser.parse_args(sys.argv[1:])
 
-    pm = module.PatrolModule(actual_patrol_module, postcmd=options.post)
+    patrol_module = module.PatrolModule(actual_patrol_module, postcmd=options.post)
 
-    if options.all:
-        pm.run_all_methods()
-        sys.exit()
-
-    if options.run:
-        if options.run in pm.method_dict:
-            pm.run_method(options.run)
-            sys.exit()
-        else:
-            sys.stderr.write("{} command not found.\n".format(options.run))
-            sys.stderr.flush()
-            sys.exit(1)
-
+    # Use directory where patrol.py resides if no directory specified
     if options.directory:
         cwd = options.directory
     else:
         cwd = patrolpy_directory
 
     os.chdir(cwd)
-    subdirectories = [os.path.realpath(x[0]) for x in os.walk(cwd)]
-    loop = pyuv.Loop.default_loop()
 
-    def close_handles():
-        """Close all I/O handles prior to exit."""
-        signal_h.close()
-        for event_handle in event_handles:
-            event_handle.close()
+    # Run all methods
+    if options.all:
+        patrol_module.run_all_methods()
+        sys.exit()
 
-    def read_handle(handle, filename, events, error):
-        """Callback every time something is modified in the repository."""
-        fullpath = os.path.realpath(handle.path + os.sep + filename)
-        if os.path.exists(fullpath):
-            relpath = fullpath.replace(os.path.realpath(cwd) + os.sep, "")
+    # Run specific method
+    if options.run:
+        if options.run in patrol_module.method_dict:
+            patrol_module.run_method(options.run)
+            sys.exit()
+        else:
+            sys.stderr.write("{} command not found.\n".format(options.run))
+            sys.stderr.flush()
+            sys.exit(1)
 
-            pm.match(relpath)
-
-    def signal_cb(handle, signum):
-        """Handle ctrl-C"""
-        close_handles()
-
-    event_handles = []
-
-    for subdirectory in subdirectories:
-        event_handle = pyuv.fs.FSEvent(loop)
-        event_handle.start(subdirectory, 0, read_handle)
-        event_handles.append(event_handle)
-
-    signal_h = pyuv.Signal(loop)
-    signal_h.start(signal_cb, signal.SIGINT)
-
-    loop.run()
-
-
-
+    watcher.watcher(cwd, patrol_module)

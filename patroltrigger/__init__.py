@@ -1,7 +1,7 @@
 import cmd
-import trigger
 import cli
 import sys
+import trigger
 
 run = cmd.run
 trigger = trigger.trigger
