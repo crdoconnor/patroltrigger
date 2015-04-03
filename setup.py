@@ -15,7 +15,7 @@ long_description = read('README.rst')
 
 
 setup(name="patroltrigger",
-      version="0.2",
+      version="0.3",
       description="Trigger custom commands from filesystem events.",
       long_description=long_description,
       classifiers=[

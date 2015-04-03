@@ -46,4 +46,5 @@ def cli(actual_patrol_module):
             sys.stderr.flush()
             sys.exit(1)
 
-    watcher.watcher(cwd, patrol_module)
+    watch_obj = watcher.Watcher(cwd, patrol_module)
+    watch_obj.run()

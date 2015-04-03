@@ -1,14 +1,15 @@
 import inspect
 import fnmatch
-import os
 import subprocess
 import time
 import sys
 
 
 class PatrolModule(object):
+    """Representation of a user's patrol.py file."""
+
     def __init__(self, actual_module, postcmd=None):
-        """Create a representation of the user's patrol.py module that can be used."""
+        """Intepret the code, list all non-private methods in order of appearance."""
         self.method_dict = {}
         self.all_methods = []
         self.postcmd = postcmd
@@ -30,36 +31,43 @@ class PatrolModule(object):
 
     def run_method(self, name, filenames=None):
         """Run a specific, named method."""
-        self.method_dict[name](filenames)
+        try:
+            self.method_dict[name](filenames)
+        except subprocess.CalledProcessError:
+            return
 
-    def match(self, filename):
-        """Match and run a filename to a method."""
+    def trigger(self, filenames):
+        """Run methods which match the listed filenames."""
+        def match(method, filenames):
+            """Return True if method's trigger matches one of the specified filenames."""
+            currently_matching = False
+
+            for filename in filenames:
+                for include in method.includes:
+                    if fnmatch.fnmatch(filename, include):
+                        currently_matching = True
+
+                if method.excludes is not None:
+                    for exclude in method.excludes:
+                        if fnmatch.fnmatch(filename, exclude):
+                            currently_matching = False
+            return currently_matching
+
         start_time = time.time()
         command_ran = False
         for name, method, _ in self.all_methods:
-            currently_matching = False
-
-            for include in method.includes:
-                if fnmatch.fnmatch(filename, include):
-                    currently_matching = True
-
-            if method.excludes is not None:
-                for exclude in method.excludes:
-                    if fnmatch.fnmatch(filename, exclude):
-                        currently_matching = False
-
-            if currently_matching:
+            if match(method, filenames):
                 command_ran = True
 
                 try:
-                    self.run_method(name, filenames=[filename])
+                    self.run_method(name, filenames=filenames)
                 except subprocess.CalledProcessError:
                     break
 
         if self.postcmd is not None and command_ran:
             try:
-                os.system(self.postcmd)
-            except Exception:
+                subprocess.check_call(self.postcmd, shell=True)
+            except subprocess.CalledProcessError:
                 sys.stderr.write("Error running postcmd.\n")
                 sys.stderr.write("\n")
                 sys.stderr.flush()

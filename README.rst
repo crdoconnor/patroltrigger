@@ -50,15 +50,15 @@ Run like so::
 Or get help::
 
     $ python patrol.py --help
-    Usage: example.py [options]
+    Usage: patrol.py [options]
 
     Options:
     -h, --help            show this help message and exit
-    -r RUN, --run=RUN     Specify a method in example.py to run directly.
-    -a, --all             Run all methods in example.py in priority order.
+    -r RUN, --run=RUN     Specify a method in patrol.py to run directly.
+    -a, --all             Run all methods in patrol.py in priority order.
     -p POST, --post=POST  Command to run after a trigger (e.g. guake)
     -d DIRECTORY, --directory=DIRECTORY
-                            Directory to run example.py in (default:
+                            Directory to run patrol.py in (default:
                             /home/user/yourproject).
 
 
@@ -66,8 +66,9 @@ Or get help::
 Features
 ========
 
-* Each time a set of methods are triggered, the total run time is timed.
-* If a command fails (e.g. a unit test), the method is aborted by default at that point to shorten feedback time. Subsequent matching methods will not run.
-* Run a custom command after each method is finished (e.g. guake, notify-send).
 * If multiple methods are triggered by a changed file, they will run *in the order they appear* in patrol.py.
+* Queue up triggers by putting a file named 'lock' in the directory patrol.py is run from. Once 'lock' is removed, the pent up triggers will all be fired.
+* Each time a set of methods are triggered, the total run time is timed.
+* If a command fails (e.g. a unit test), the method is aborted by default at that point to shorten feedback time. Subsequent methods will not run.
+* Run a custom command after each method is finished (e.g. guake, notify-send).
 * Ability to run commands manually.
