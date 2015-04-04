@@ -3,7 +3,7 @@ PatrolTrigger
 
 Trigger custom commands from filesystem events.
 
-Patrol uses libuv, which creates event driven hooks to filesystem events using epoll, kqueue or IOCP.
+Patrol uses libuv_, which creates event driven hooks to filesystem events using epoll, kqueue or IOCP.
 
 You can use it to selectively build your project when files change and run tests as soon as you hit the save button.
 
@@ -72,3 +72,6 @@ Features
 * If a command fails (e.g. a unit test), the method is aborted by default at that point to shorten feedback time. Subsequent methods will not run.
 * Run a custom command after each method is finished (e.g. guake, notify-send).
 * Ability to run commands manually.
+
+
+.. _libuv: https://github.com/libuv/libuv
